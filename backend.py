@@ -107,8 +107,7 @@ def transcribe_audio(wav_path: Path):
     Each segment: {start, end, text}
     """
     whisper = get_whisper_model()
-    segments, info = whisper.transcribe(audio_path)
-
+    segments, info = whisper.transcribe(str(wav_path))
 
     transcript_parts = []
     diarization: List[Dict[str, Any]] = []
@@ -117,6 +116,7 @@ def transcribe_audio(wav_path: Path):
         text = seg.text.strip()
         if not text:
             continue
+
         transcript_parts.append(text)
         diarization.append(
             {
@@ -128,6 +128,7 @@ def transcribe_audio(wav_path: Path):
 
     transcript = " ".join(transcript_parts)
     return transcript.strip(), diarization
+
 
 
 # -----------------------------
