@@ -523,7 +523,11 @@ if audio_bytes:
                 }
 
                 # Send to backend
-                response = requests.post(BACKEND_URL, files=files, timeout=600)
+                try:
+                    response = requests.post(BACKEND_URL, files=files, timeout=600)
+                except requests.exceptions.RequestException:
+                    st.error("🚨 Backend is waking up. Please try again in 1 minute.")
+                    st.stop()
 
                 if response.status_code != 200:
                     st.error(f" Backend error ({response.status_code}): {response.text}")
