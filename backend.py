@@ -515,26 +515,11 @@ async def summarize_meeting(
     audio: UploadFile = File(...),
     target_lang: Optional[str] = Form(None),
 ):
-    """
-    Main endpoint:
-    - Transcribe audio
-    - Extract structured summary (Gemini + fallback)
-    - Generate follow-up email + WhatsApp message
-    - Optionally translate summary if target_lang is provided
-    - Return diarization + speaker list
-    """
-    # Save uploaded file to temp
-    tmp_path = Path(tempfile.gettempdir()) / f"up_{audio.filename}"
+    suffix = Path(audio.filename).suffix or ".bin"
 
-    with open(tmp_path, "wb") as f:
-        while True:
-            chunk = await audio.read(1024 * 1024)
-            if not chunk:
-                break
-            f.write(chunk)
-
-    if not tmp_path.exists():
-        raise HTTPException(status_code=400, detail="Failed to save uploaded file.")
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        tmp.write(await audio.read())
+        tmp_path = Path(tmp.name)
 
     try:
         wav_path = convert_to_wav(tmp_path)
@@ -543,13 +528,16 @@ async def summarize_meeting(
         if not transcript.strip():
             raise HTTPException(status_code=400, detail="Transcription is empty.")
 
-        note = ""
+        # rest of your logic unchanged…
+
+    finally:
         try:
-            extracted = gemini_extract_structured(transcript)
-        except Exception as e:
-            # Fallback to local extractor if Gemini fails
-            note = f"Note: Gemini failed, using local extraction instead. ({e})"
-            extracted = local_extract(transcript)
+            tmp_path.unlink(missing_ok=True)
+            if "wav_path" in locals():
+                wav_path.unlink(missing_ok=True)
+        except Exception:
+            pass
+
 
         # Extra Gemini features
         summary_text = extracted.get("summary", "")
