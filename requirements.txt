@@ -1,0 +1,37 @@
+# ===============================
+# Backend – FastAPI + Whisper + Gemini
+# ===============================
+
+fastapi>=0.110
+uvicorn[standard]>=0.27
+
+# Audio processing
+pydub>=0.25.1
+faster-whisper>=1.0.0
+
+# Gemini API
+google-generativeai>=0.5.0
+
+# Utilities
+python-multipart>=0.0.9
+typing-extensions>=4.10.0
+
+
+# ===============================
+# Frontend – Streamlit UI
+# ===============================
+
+streamlit>=1.32
+requests>=2.31
+
+# Live audio recording
+streamlit-audiorecorder>=0.0.6
+
+
+# ===============================
+# Optional / System Notes
+# ===============================
+# ffmpeg is REQUIRED at system level for pydub & whisper
+# Not installable via pip:
+#   Ubuntu/Debian: sudo apt install ffmpeg
+#   Windows: https://ffmpeg.org/download.html
