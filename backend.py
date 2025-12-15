@@ -70,14 +70,22 @@ WHISPER_DEVICE = "cpu"
 WHISPER_COMPUTE = "int8"
 
 print(f"Loading faster-whisper (tiny) | device={WHISPER_DEVICE} compute={WHISPER_COMPUTE} ...")
-whisper_model = WhisperModel(
-    "tiny",
-    device=WHISPER_DEVICE,
-    compute_type=WHISPER_COMPUTE,
-    cpu_threads=os.cpu_count() or 4,
-)
-print("✅ Whisper (tiny) loaded.")
+from functools import lru_cache
+from faster_whisper import WhisperModel
 
+@lru_cache()
+def get_whisper_model():
+    print("🔄 Loading Whisper model (tiny)...")
+    return WhisperModel(
+        "tiny",
+        device="cpu",
+        compute_type="int8"
+    )
+
+
+@app.get("/")
+def health():
+    return {"status": "ok"}
 
 # -----------------------------
 # 4. AUDIO HELPERS
@@ -98,12 +106,9 @@ def transcribe_audio(wav_path: Path):
     Transcribe audio using faster-whisper tiny and also return diarization segments.
     Each segment: {start, end, text}
     """
-    segments, info = whisper_model.transcribe(
-        str(wav_path),
-        beam_size=1,
-        vad_filter=True,
-        vad_parameters={"threshold": 0.4},
-    )
+    whisper = get_whisper_model()
+    segments, info = whisper.transcribe(audio_path)
+
 
     transcript_parts = []
     diarization: List[Dict[str, Any]] = []
