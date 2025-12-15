@@ -6,7 +6,7 @@ from audiorecorder import audiorecorder
 import io
 import wave
 
-BACKEND_URL = "http://localhost:8000/summarize"
+BACKEND_URL = "https://meet-assistant-xara.onrender.com"
 
 st.set_page_config(
     page_title="Smart Meeting Assistant",
